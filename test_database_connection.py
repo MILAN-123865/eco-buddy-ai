@@ -228,3 +228,38 @@ def test_create_connection_closes_when_configuration_fails(
         create_connection("broken.db")
 
     assert fake.closed is True
+
+
+def test_transient_lock_detection_false():
+    assert not is_transient_lock_error(ValueError("not an operational error"))
+    assert not is_transient_lock_error(sqlite3.OperationalError("some other error"))
+
+
+def test_create_connection_invalid_timeout():
+    with pytest.raises(ValueError, match="busy_timeout_ms cannot be negative"):
+        create_connection("dummy.db", busy_timeout_ms=-1)
+
+
+def test_execute_with_retry_invalid_args():
+    with pytest.raises(ValueError, match="max_attempts must be at least 1"):
+        execute_with_retry(lambda: None, max_attempts=0)
+    with pytest.raises(ValueError, match="base_delay cannot be negative"):
+        execute_with_retry(lambda: None, base_delay=-0.5)
+
+
+def test_create_connection_wal_error(monkeypatch):
+    class MockConnection(sqlite3.Connection):
+        def execute(self, sql, *args, **kwargs):
+            if "journal_mode = WAL" in sql:
+                raise sqlite3.DatabaseError("WAL not supported")
+            return super().execute(sql, *args, **kwargs)
+
+    original_connect = sqlite3.connect
+    monkeypatch.setattr(sqlite3, "connect", lambda *a, **k: original_connect(*a, factory=MockConnection, **k))
+    conn = create_connection("dummy_wal_test.db", enable_wal=True)
+    conn.close()
+    import os
+    try:
+        os.remove("dummy_wal_test.db")
+    except:
+        pass

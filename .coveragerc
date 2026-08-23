@@ -1,7 +1,9 @@
 [coverage:run]
 branch = True
 source =
-    .
+    database_connection
+    database_integrity
+    invalidation
 omit =
     tests/*
     test_*

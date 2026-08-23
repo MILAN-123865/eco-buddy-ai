@@ -31,6 +31,8 @@ import energy_audit as ea
 from styles.theme import apply_theme
 apply_theme()
 
+total = 0.0
+
 
 from cache import cached
 from cache_config import TTL_LLM_RESPONSE
@@ -1065,14 +1067,6 @@ if st.button("Save Budget"):
     )
 
     st.success("Budget saved successfully.")
-if progress>=0.9:
-    st.error("⚠ You are close to exceeding your carbon budget.")
-
-elif progress>=0.7:
-    st.warning("Approaching your carbon budget.")
-
-else:
-    st.success("Within budget.")
 forecast=total*1.10
 
 st.metric(
@@ -1125,75 +1119,75 @@ if budget:
         )
 
     st.progress(progress)
-if progress >= 0.9:
-
-    st.error(
-        "⚠ You are very close to exceeding your carbon budget."
-    )
-
-elif progress >= 0.7:
-
-    st.warning(
-        "Approaching your carbon budget."
-    )
-
-else:
-
-    st.success(
-        "Great! You are within your carbon budget."
-    )
-forecast = used * 1.10
-
-st.metric(
-    "Estimated End-of-Month Emissions",
-    f"{forecast:.2f} kg CO₂"
-)
-
-if forecast > budget_limit:
-
-    st.error(
-        "Forecast indicates you may exceed your budget."
-    )
-
-else:
-
-    st.success(
-        "Forecast indicates you are likely to stay within budget."
-    )
-col1,col2,col3 = st.columns(3)
-
-with col1:
+    if progress >= 0.9:
+    
+        st.error(
+            "⚠ You are very close to exceeding your carbon budget."
+        )
+    
+    elif progress >= 0.7:
+    
+        st.warning(
+            "Approaching your carbon budget."
+        )
+    
+    else:
+    
+        st.success(
+            "Great! You are within your carbon budget."
+        )
+    forecast = used * 1.10
+    
     st.metric(
-        "Budget",
-        f"{budget_limit:.2f}"
+        "Estimated End-of-Month Emissions",
+        f"{forecast:.2f} kg CO₂"
     )
-
-with col2:
-    st.metric(
-        "Used",
-        f"{total:.2f}"
-    )
-
-with col3:
-    st.metric(
-        "Remaining",
-        f"{remaining:.2f}"
-    )
-st.progress(progress)
-st.subheader("Suggestions")
-
-if forecast > budget_limit:
-
-    st.write("• Reduce electricity consumption")
-
-    st.write("• Prefer walking or cycling")
-
-    st.write("• Use public transport")
-
-    st.write("• Reduce unnecessary flights")
-
-else:
-
-    st.success(
-        "You're on track to stay within your carbon budget."
-    )
+    
+    if forecast > budget_limit:
+    
+        st.error(
+            "Forecast indicates you may exceed your budget."
+        )
+    
+    else:
+    
+        st.success(
+            "Forecast indicates you are likely to stay within budget."
+        )
+    col1,col2,col3 = st.columns(3)
+    
+    with col1:
+        st.metric(
+            "Budget",
+            f"{budget_limit:.2f}"
+        )
+    
+    with col2:
+        st.metric(
+            "Used",
+            f"{total:.2f}"
+        )
+    
+    with col3:
+        st.metric(
+            "Remaining",
+            f"{remaining:.2f}"
+        )
+    st.progress(progress)
+    st.subheader("Suggestions")
+    
+    if forecast > budget_limit:
+    
+        st.write("• Reduce electricity consumption")
+    
+        st.write("• Prefer walking or cycling")
+    
+        st.write("• Use public transport")
+    
+        st.write("• Reduce unnecessary flights")
+    
+    else:
+    
+        st.success(
+            "You're on track to stay within your carbon budget."
+        )
